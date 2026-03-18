@@ -766,11 +766,9 @@ function convertCursorToolName(claudeTool) {
 }
 
 function convertSlashCommandsToCursorSkillMentions(content) {
-  let converted = content.replace(/\/gsd:([a-z0-9-]+)/gi, (_, commandName) => {
-    return `gsd-${String(commandName).toLowerCase()}`;
-  });
-  converted = converted.replace(/\/gsd-help\b/g, 'gsd-help');
-  return converted;
+  // Keep leading "/" for slash commands; only normalize gsd: -> gsd-.
+  // This preserves rendered "next step" commands like "/gsd-execute-phase 17".
+  return content.replace(/gsd:/gi, 'gsd-');
 }
 
 function convertClaudeToCursorMarkdown(content) {
@@ -1831,7 +1829,7 @@ function copyWithPathReplacement(srcDir, destDir, pathPrefix, runtime, isCommand
     } else if (isCursor && (entry.name.endsWith('.cjs') || entry.name.endsWith('.js'))) {
       // For Cursor, also convert Claude references in JS/CJS utility scripts
       let jsContent = fs.readFileSync(srcPath, 'utf8');
-      jsContent = jsContent.replace(/\/gsd:([a-z0-9-]+)/gi, (_, cmd) => `gsd-${cmd.toLowerCase()}`);
+      jsContent = jsContent.replace(/gsd:/gi, 'gsd-');
       jsContent = jsContent.replace(/\.claude\/skills\//g, '.cursor/skills/');
       jsContent = jsContent.replace(/CLAUDE\.md/g, '.cursor/rules/');
       jsContent = jsContent.replace(/\bClaude Code\b/g, 'Cursor');
